@@ -1,1 +1,4 @@
-## Place your answers here.
+
+Exercise 2
+
+- exploit-2a.py exploits the buffer overflow at http.c:105 (the first vulnerability listed in bugs.txt).
