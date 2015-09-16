@@ -1,17 +1,75 @@
-#
-# [file:#lines]
-# desc
-#
 
-[zookd.c:1612]
-description goes here. for example, the 'buf' variable can be
-overwritten by the 'msg' variable because ...
+[http.c:105]
+A buffer overflow can be created here (in 'http_request_line') because
+'url_decode' does not check bounds on the buffer 'dst' while writing the
+decoded URI into it.
+The 'reqpath' buffer (passed to 'http_request_line' as an argument) is allocated
+on the stack in 'process_client' (zookd.c:70), and is of size 2048.
+Therefore, any URI longer than 2048 bytes will cause the buffer to overflow.
+Exploiting this vulnerability would require overwriting the return address,
+which means that it could be prevented by a stack canary.
+The offending line of code is:
 
-    <paste offending line(s) of code here>
+    url_decode(reqpath, sp1);
 
-[http.c:1512]
-another description.
 
-    <paste offending line(s) of code here>
+[http.c:159]
+This is a similar vulnerability to the one directly above, as it exploits the
+lack of bounds checking in 'url_decode'.
+This time, however, it occurs when we are decoding the headers.
+The buffer in which the decoded url is stored ('value') is only 512 bytes long.
+Therefore, any request header with a value longer than 512 bytes will cause the
+'value' buffer to overflow.
+Exploiting this vulnerability would require overwriting the return address,
+which means that it could be prevented by a stack canary.
+The offending line of code is:
 
-# many more come here
+    url_decode(value, sp);
+
+[http.c:165]
+This vulnerability arises from the unsafe use of 'sprintf'.
+The string "HTTP_<header name>" is written to the 'envvar' buffer, which is only
+512 bytes long.
+Thus, if a request to the server includes a header with a name of more than 507
+bytes, then it will cause the 'envvar' buffer to overflow.
+Exploiting this vulnerability would require overwriting the return address,
+which means that it could be prevented by a stack canary.
+The offending line of code is:
+
+    sprintf(envvar, "HTTP_%s", buf);
+
+[http.c:282]
+A buffer overflow can be created here because the function ('http_serve')
+concatenates an arbitrary input string ('name') to a stack-allocated buffer
+('pn') without bounds checking (specifically, by using 'strcat').
+The only place 'http_serve' is called non-recursively is in zookfs.c:47, where
+it passes in the environment variable REQUEST_URI as the argument.
+REQUEST_URI is set equal to 'reqpath' in 'http_request_line' (http.c:107),
+which in turn is equal to the http request path with escapes decoded.
+The buffer 'pn' in 'http_serve' is only 1024 bytes long, which means that if
+the request URI is longer than (1024 - <size of current working dir>), it will
+overflow the 'pn' buffer.
+Here, in addition to overwriting the return address, we also have the option of
+overwriting the 'header' function pointer.
+A stack canary would be able to prevent the former exploit, but not the latter.
+The offending line of code is:
+
+    strcat(pn, name);
+
+[http.c:358]
+A buffer overflow can be created in 'http_serve_directory' because the
+stack-allocated buffer 'name' is used as an argument to the function 'dir_join',
+which doesn't check bounds (uses strcpy instead of strncpy).
+This could theoretically be exploited by requesting a resource with a very long
+URI; however, due to the intricacies of 'split_path', it is unclear whether it
+would be consistently exploitable.
+Exploiting this vulnerability would require overwriting the return address,
+which means that it could be prevented by a stack canary.
+The offending line of code is:
+
+    dir_join(name, pn, indices[i]);
+
+Within dir_join, the offending line of code is:
+
+    strcpy(dst, dirname);
+
