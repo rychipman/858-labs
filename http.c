@@ -461,7 +461,9 @@ void url_decode(char *dst, const char *src)
             if (*dst == '\0')
                 break;
         }
-
+        if strlen(dst) == 0 {
+            break;
+        }
         dst++;
     }
 }
