@@ -4,3 +4,13 @@ Exercise 2
 - exploit-2a.py exploits the buffer overflow at http.c:105 (the first vulnerability listed in bugs.txt).
 
 - exploit-2b.py exploits the buffer overflow at http.c:282 (the fourth vulnerability listed in bugs.txt).
+
+Exercise 4
+
+The other buffer overflow vulnerabilities from exercise 1 (the second and third vulnerabilities listed in the file) can also be exploited in this way. The buffers can be overfowed and estended to return to libc.
+
+Exercise 5
+
+On a first review, the web server is almost certainly susceptible to denial of service attacks. This attack can be executed simply by creating a large volume of requests. The limitations of this attack, however, are that it can't do too much beyond consuming exorbitant amounts of processor/RAM resources.
+
+Additionally, a malicious user could craft a url using relative paths to gain access to files other than the ones he is intended to read. While this attack would not allow files to be read that are outside the permission scope of the user running the server, there are still a number pof potentially dangerous pieces of information that could be leaked, especially if the server is run as root.
