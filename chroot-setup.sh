@@ -76,3 +76,5 @@ set_perms 123:456 777 /jail/zoobar/db/person
 set_perms 123:456 777 /jail/zoobar/db/person/person.db
 set_perms 123:456 777 /jail/zoobar/db/transfer
 set_perms 123:456 777 /jail/zoobar/db/transfer/transfer.db
+
+set_perms 1234:5678 777 /jail/zoobar/index.cgi
