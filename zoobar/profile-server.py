@@ -49,8 +49,9 @@ class ProfileAPIServer(rpclib.RpcServer):
                }
 
     def rpc_xfer(self, target, zoobars):
-        # TODO: get fourth argument (sender token) from somewhere
-        bank_client.transfer(self.user, target, zoobars)
+        # TODO: find a way to get the token
+        bank.transfer(self.user, target, zoobars)
+
 
 def run_profile(pcode, profile_api_client):
     globals = {'api': profile_api_client}
@@ -58,7 +59,7 @@ def run_profile(pcode, profile_api_client):
 
 class ProfileServer(rpclib.RpcServer):
     def rpc_run(self, pcode, user, visitor):
-        uid = 0
+        uid = 9999
 
         userdir = '/tmp'
 

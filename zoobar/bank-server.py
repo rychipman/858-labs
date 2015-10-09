@@ -3,11 +3,14 @@
 import rpclib
 import sys
 import bank
+import auth_client
 from debug import *
 
 class BankRpcServer(rpclib.RpcServer):
     def rpc_transfer(self, sender, recipient, zoobars, token):
-        return bank.transfer(sender, recipient, zoobars, token)
+        if not auth_client.check_token(sender, token):
+            return False
+        return bank.transfer(sender, recipient, zoobars)
 
     def rpc_balance(self, username):
         return bank.balance(username)
