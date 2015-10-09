@@ -76,11 +76,19 @@ set_perms 123:456 777 /jail
 set_perms 123:456 777 /jail/zoobar
 set_perms 123:456 777 /jail/zoobar/db
 set_perms 123:456 777 /jail/zoobar/db/person
-set_perms 123:456 777 /jail/zoobar/db/person/person.db
+set_perms 123:456 776 /jail/zoobar/db/person/person.db
 set_perms 123:456 777 /jail/zoobar/db/transfer
-set_perms 123:456 777 /jail/zoobar/db/transfer/transfer.db
+set_perms 123:456 776 /jail/zoobar/db/transfer/transfer.db
 
-set_perms 1234:5678 777 /jail/zoobar/index.cgi
+# DONE
+# index.cgi should only be touched by dynamic_svc.
+# Needs to be read and executed only.
+set_perms 1234:456 500 /jail/zoobar/index.cgi
 
+# cred/ should only be touched by auth_svc.
+# Needs to be readable and executable. (apparently also writable, but WHY)
 set_perms 10003:20003 700 /jail/zoobar/db/cred
-set_perms 10003:20003 700 /jail/zoobar/db/cred/cred.db
+
+# cred.db should only be touched by auth_svc.
+# Needs to be read and written, but never executed.
+set_perms 10003:20003 600 /jail/zoobar/db/cred/cred.db
