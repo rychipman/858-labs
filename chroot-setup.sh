@@ -74,7 +74,7 @@ python /jail/zoobar/zoodb.py init-cred
 
 set_perms 123:456 777 /jail
 set_perms 123:456 777 /jail/zoobar
-set_perms 123:456 777 /jail/zoobar/db
+set_perms 123:456 555 /jail/zoobar/db
 set_perms 123:456 777 /jail/zoobar/db/person
 set_perms 123:456 776 /jail/zoobar/db/person/person.db
 set_perms 123:456 777 /jail/zoobar/db/transfer
