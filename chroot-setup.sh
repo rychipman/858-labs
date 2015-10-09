@@ -58,6 +58,7 @@ cp -r /usr/share/zoneinfo/America /jail/usr/share/zoneinfo/
 
 create_socket_dir /jail/echosvc 61010:61010 755
 create_socket_dir /jail/authsvc 10003:20003 755
+create_socket_dir /jail/banksvc 10004:20004 755
 
 mkdir -p /jail/tmp
 chmod a+rwxt /jail/tmp
@@ -71,6 +72,7 @@ rm -rf /jail/zoobar/db
 python /jail/zoobar/zoodb.py init-person
 python /jail/zoobar/zoodb.py init-transfer
 python /jail/zoobar/zoodb.py init-cred
+python /jail/zoobar/zoodb.py init-bank
 
 set_perms 123:456 777 /jail
 set_perms 123:456 777 /jail/zoobar
@@ -92,3 +94,6 @@ set_perms 10003:20003 700 /jail/zoobar/db/cred
 # cred.db should only be touched by auth_svc.
 # Needs to be read and written, but never executed.
 set_perms 10003:20003 600 /jail/zoobar/db/cred/cred.db
+
+set_perms 10004:20004 700 /jail/zoobar/db/bank
+set_perms 10004:20004 600 /jail/zoobar/db/bank/bank.db

@@ -6,6 +6,8 @@ import random
 import os
 import pbkdf2
 
+import bank_client
+
 def newtoken(db, cred):
     hashinput = "%s%.10f" % (cred.password, random.random())
     cred.token = hashlib.md5(hashinput).hexdigest()
@@ -38,6 +40,7 @@ def register(username, password):
     newcred.password = pbkdf2.PBKDF2(password, newcred.salt).hexread(32)
     cred_db.add(newcred)
     cred_db.commit()
+    bank_client.register(username)
     return newtoken(cred_db, newcred)
 
 def check_token(username, token):
