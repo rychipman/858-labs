@@ -49,6 +49,7 @@ class ProfileAPIServer(rpclib.RpcServer):
                }
 
     def rpc_xfer(self, target, zoobars):
+        # TODO: get fourth argument (sender token) from somewhere
         bank_client.transfer(self.user, target, zoobars)
 
 def run_profile(pcode, profile_api_client):
