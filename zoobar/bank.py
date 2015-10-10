@@ -4,7 +4,9 @@ from debug import *
 import time
 import auth_client
 
-def transfer(sender, recipient, zoobars):
+def transfer(sender, recipient, zoobars, token):
+    if not auth_client.check_token(sender, token):
+        return False
     bank_db = bank_setup()
     sender_bank = bank_db.query(Bank).get(sender)
     recipient_bank = bank_db.query(Bank).get(recipient)
