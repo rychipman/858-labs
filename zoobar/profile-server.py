@@ -9,6 +9,7 @@ import hashlib
 import socket
 import bank
 import bank_client
+import string
 
 from zoodb import *
 from debug import *
@@ -62,7 +63,14 @@ class ProfileServer(rpclib.RpcServer):
     def rpc_run(self, pcode, user, visitor):
         uid = 9999
 
-        userdir = '/tmp'
+
+        valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+        clean_username = ''.join(c for c in user if c in valid_chars)
+        userdir = '/tmp/profile-dirs/' + clean_username
+
+        if not os.path.exists(userdir):
+            os.mkdir(userdir)
+            os.chmod(userdir, 0777)
 
         cred_db = cred_setup()
         cred = cred_db.query(Cred).get(user)

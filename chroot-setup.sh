@@ -98,3 +98,6 @@ set_perms 10003:20003 600 /jail/zoobar/db/cred/cred.db
 
 set_perms 10004:20004 700 /jail/zoobar/db/bank
 set_perms 10004:20004 600 /jail/zoobar/db/bank/bank.db
+
+mkdir -p /jail/tmp/profile-dirs
+chmod 777 /jail/tmp/profile-dirs
