@@ -12,7 +12,11 @@ def transfer():
     warning = None
     try:
         if 'recipient' in request.form:
+            if request.form['recipient'] == g.user.person.username:
+                raise ValueError("Cannot transfer to self")
             zoobars = symint(request.form['zoobars'])
+            if zoobars < 0:
+                raise ValueError("Cannot transfer negative zoobars")
             bank.transfer(g.user.person.username,
                           request.form['recipient'], zoobars)
             warning = "Sent %d zoobars" % zoobars
