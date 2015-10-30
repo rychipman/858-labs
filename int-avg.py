@@ -21,7 +21,10 @@ b = z3.BitVec('b', 32)
 ## Use z3.UDiv(x, y) for unsigned division of x by y.
 ## Use z3.LShR(x, y) for unsigned (logical) right shift of x by y bits.
 u_avg = (a & b) + z3.LShR((a^b), 1)
-s_avg = (a + b) / 2
+
+intrm = (a & b) + ((a^b) >> 1)
+s_avg = intrm + (z3.LShR(intrm, 31) & (a^b))
+
 
 ## Do not change the code below.
 
