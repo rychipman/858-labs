@@ -728,42 +728,34 @@ def concolic_test(testfunc, maxiter = 100, verbose = 0):
     ## for each branch, invoke Z3 to find an input that would go
     ## the other way, and add it to the list of inputs to explore.
 
-    ## Exercise 3: your code here.
-    ##
-    ## Here's a possible plan of attack:
-    ##
-    ## - Iterate over the set of branches in cur_path_constr.
-    ##
-    ## - Compute an AST expression for the constraints necessary
-    ##   to go the other way on that branch.  You can use existing
-    ##   logical AST combinators like sym_not(), sym_and(), etc.
-    ##
-    ##   Note that some of the AST combinators take separate positional
-    ##   arguments. In Python, to unpack a list into separate positional
-    ##   arguments, use the '*' operator documented at
-    ##   https://docs.python.org/2/tutorial/controlflow.html#unpacking-argument-lists
-    ##
-    ## - If this constraint is already in the "checked" set, skip
-    ##   it (otherwise, add it to prevent further duplicates).
-    ##
-    ## - Invoke Z3, along the lines of:
-    ##
-    ##     (ok, model) = fork_and_check(constr)
-    ##
-    ## - If Z3 was able to find example inputs that go the other
-    ##   way on this branch, make a new input set containing the
-    ##   values from Z3's model, and add it to the set of inputs
-    ##   to consider:
-    ##
-    ##     inputs.add(new_values, caller)
-    ##
-    ##   where caller is the corresponding value from the list
-    ##   of call sites (cur_path_constr_callers).
-    ##
-    ##   Note that Z3 might not assign values to every variable,
-    ##   such as if that variable turns out to be irrelevant to
-    ##   the overall constraint, so be sure to preserve values
-    ##   from the initial input (concrete_values).
+    for idx in range(len(cur_path_constr)):
+      branch = simplify(cur_path_constr[idx])
+      const_for_branch = simplify(sym_and(branch, *cur_path_constr[:idx]))
+      if const_for_branch in checked:
+        continue
+      checked.add(const_for_branch)
+
+      # compute an ast to go the other way on branch
+      opposite_br = sym_not(branch)
+      const_for_opp_br = simplify(sym_and(opposite_br, *cur_path_constr[:idx]))
+
+      # if already checked, skip it
+      if const_for_opp_br in checked:
+        continue
+      checked.add(const_for_opp_br)
+
+      # use Z3 to find another input set to add to inputs
+      (ok, model) = fork_and_check(const_for_opp_br)
+      if ok != z3.sat:
+        continue
+
+      new_concrete_values = {}
+      for conc in concrete_values:
+        new_concrete_values[conc] = concrete_values[conc]
+      for conc in model:
+        new_concrete_values[conc] = model[conc]
+
+      inputs.add(new_concrete_values, cur_path_constr_callers[idx])
 
   if verbose > 0:
     print 'Stopping after', iter, 'iterations'
