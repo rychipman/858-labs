@@ -5,62 +5,58 @@ var webpage = require("webpage");
 var grading = require("./grading");
 
 function main(studentDir) {
-    if (studentDir === undefined) {
-        console.log("USAGE: phantomjs " + system.args[0] + " student_dir/");
-        phantom.exit();
-        return;
-    }
-    var answerPath = studentDir + "/answer-7.html";
-    if (!fs.isFile(answerPath)) {
-        grading.failed("No answer-7.html");
-        phantom.exit();
-        return;
-    }
-
-    grading.registerTimeout();
-
-    // Initialize the world.
-    grading.initUsers(function(auth) {
-        // The grader (victim) will already be logged in to the zoobar
-        // site before loading your page.
-        phantom.cookies = auth.graderCookies;
-
-        // Open the attacker's page.
-        var page = webpage.create();
-        page.open(answerPath);
-
-        page.onLoadFinished = function(status) {
-            if (page.url.indexOf("answer-7.html") > -1) {
+        if (studentDir === undefined) {
+                console.log("USAGE: phantomjs " + system.args[0] + " student_dir/");
+                phantom.exit();
                 return;
-            }
+        }
+        var answerPath = studentDir + "/answer-7.html";
+        if (!fs.isFile(answerPath)) {
+                grading.failed("No answer-7.html");
+                phantom.exit();
+                return;
+        }
 
-            page.onLoadFinished = null;
-            page.close();
+        grading.registerTimeout();
 
-            // Check that the grader now has no zoobars.
-            grading.getZoobars(function(number) {
-                if (number != 0) {
-                    grading.failed("grader has " + number + " zoobars, should have 0");
-                } else {
-                    grading.passed("grader zoobar count");
-                }
+        // Initialize the world.
+        grading.initUsers(function(auth) {
+                // Open the attacker's page logged in as the grader.
+                phantom.cookies = auth.graderCookies;
+                var page = webpage.create();
 
-                // Check that the attacker now has 20.
-                phantom.cookies = auth.attackerCookies;
-                grading.getZoobars(function(number) {
-                    if (number != 20) {
-                        grading.failed("attacker has " + number + " zoobars, should have 20");
-                    } else {
-                        grading.passed("attacker zoobar count");
-                    }
+                page.onLoadFinished = function(status) {
+                        if (page.url.indexOf("answer-7.html") > -1) {
+                                return;
+                        }
+                        page.onLoadFinished = null;
+                        page.close();
 
-                    phantom.exit();
-                });
-            });
+                        // Check that the grader now has no zoobars.
+                        phantom.cookies = auth.graderCookies;
+                        grading.getZoobars(function(number) {
+                                if (number != 0) {
+                                        grading.failed("grader has " + number + " zoobars, should have 0");
+                                } else {
+                                        grading.passed("grader zoobar count");
+                                }
 
-        };
+                                // Check that the attacker now has 20.
+                                phantom.cookies = auth.attackerCookies;
+                                grading.getZoobars(function(number) {
+                                        if (number != 20) {
+                                                grading.failed("attacker has " + number + " zoobars, should have 20");
+                                        } else {
+                                                grading.passed("attacker zoobar count");
+                                        }
 
-    });
+                                        phantom.exit();
+                                });
+                        });
+                };
+                page.open(answerPath);
+
+        });
 }
 
 main.apply(null, system.args.slice(1));
